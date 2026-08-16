@@ -74,4 +74,14 @@ export const PropertyAPI = {
     return d.data;
   },
 
+  getFavorites: async () => {
+    const d = await apiClient.get<PropertyItem[]>('properties/my-favorites');
+    return d.data;
+  },
+
+  toggleFavorite: async (id: string) => {
+    const d = await apiClient.patch(`properties/${id}/toggle-favorite`);
+    return d.data;
+  },
+
 }

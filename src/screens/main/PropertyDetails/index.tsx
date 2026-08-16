@@ -1,9 +1,9 @@
 import { View, Text, Alert } from 'react-native'
-import React, { useEffect } from 'react'
+import React, { useCallback, useEffect } from 'react'
 import ScreenWrapper from './components/ScreenWrapper'
 import PropertyDetailsScreen from './components/PropertyDetailsScreen'
 import { PropertyAPI } from '../../../api/properties'
-import { useNavigation, useRoute } from '@react-navigation/native'
+import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native'
 import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from '../../../store/store'
 import Skeleton from '../../../components/ui/Skeleton'
@@ -27,6 +27,12 @@ const PropertyDetails = () => {
       dispatch(saveRoomTypes(d))// Saving room types in redux
     })
   }, [])
+
+  useFocusEffect(
+    useCallback(() => {
+      PropertyAPI.getSingleProperty(route.params.pid).then((d) => dispatch(saveProperty(d)));
+    }, [route.params.pid]),
+  );
 
   console.log("currentProperty", currentProperty)
 

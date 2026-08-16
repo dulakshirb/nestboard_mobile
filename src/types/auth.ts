@@ -1,7 +1,11 @@
 // src/types/auth.ts
 export interface User {
-  displayName: string;
+  id: string;
   email: string;
+  displayName: string;
+  role: "ADMIN" | "USER";
+  avatarUrl: string | null;
+  bioTag: string | null;
 }
 
 export interface AuthTokens {

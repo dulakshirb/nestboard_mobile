@@ -1,25 +1,35 @@
-import { View, Text, TouchableOpacity, StyleSheet, Button } from 'react-native'
-import React from 'react'
-import { ArrowLeft, Bell, Heart } from 'lucide-react-native'
-import { Colors } from '../../../../constant/colors'
-import RoundButton from '../../../../components/ui/RoundButton'
-import { useNavigation } from '@react-navigation/native'
-import { useDispatch } from 'react-redux'
-import { logout } from '../../../../store/authSlice'
-import { removeRefreshToken } from '../../../../util/localStorage'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { View, StyleSheet } from 'react-native';
+import React from 'react';
+import { ArrowLeft, Heart } from 'lucide-react-native';
+import { Colors } from '../../../../constant/colors';
+import RoundButton from '../../../../components/ui/RoundButton';
+import { useNavigation } from '@react-navigation/native';
+import { useSelector, useDispatch } from 'react-redux';
+import { RootState } from '../../../../store/store';
+import { saveProperty } from '../../../../store/propertySlice';
+import { PropertyAPI } from '../../../../api/properties';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const PropertyHeader = () => {
-
   const nav: any = useNavigation();
   const dispatch = useDispatch();
-  const gap = useSafeAreaInsets();
+  const insets = useSafeAreaInsets();
 
+  const currentProperty = useSelector(
+    (state: RootState) => state.property.currentProperty,
+  );
+  const favorited = currentProperty?.isFavorite ?? false;
+
+  const toggleFavorite = async () => {
+    if (!currentProperty) return;
+    try {
+      await PropertyAPI.toggleFavorite(currentProperty.id);
+      dispatch(saveProperty({ ...currentProperty, isFavorite: !favorited }));
+    } catch { }
+  };
 
   return (
-    <View style={[styles.container, {
-      paddingTop: gap.top
-    }]}>
+    <View style={[styles.container, { paddingTop: insets.top }]}>
       <RoundButton
         Icon={<ArrowLeft color={Colors.SECONDARY_COLOR} size={20} />}
         onPress={() => {
@@ -28,17 +38,20 @@ const PropertyHeader = () => {
       />
       <View style={{ flex: 1 }}></View>
       <RoundButton
-        Icon={<Heart color={Colors.SECONDARY_COLOR} size={20} />}
-        onPress={() => {
-          dispatch(logout())
-          removeRefreshToken();
-        }}
+        Icon={
+          <Heart
+            color={favorited ? Colors.PRIMARY_COLOR : Colors.SECONDARY_COLOR}
+            size={20}
+            fill={favorited ? Colors.PRIMARY_COLOR : 'transparent'}
+          />
+        }
+        onPress={toggleFavorite}
       />
     </View>
-  )
-}
+  );
+};
 
-export default PropertyHeader
+export default PropertyHeader;
 
 const styles = StyleSheet.create({
   container: {
@@ -47,9 +60,4 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     position: 'absolute',
   },
-  nest: {
-    color: Colors.SECONDARY_COLOR,
-    fontSize: 30,
-    fontWeight: '700',
-  }
-})
+});

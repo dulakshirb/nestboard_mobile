@@ -40,10 +40,7 @@ const Header = () => {
         <RoundButton
           Icon={<Bell color={Colors.SECONDARY_COLOR} size={20} />}
           orangeIndicator
-          onPress={() => {
-            dispatch(logout())
-            removeRefreshToken();
-          }}
+          onPress={() => { }}
         />
       </View>
     </View>

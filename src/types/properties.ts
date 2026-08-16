@@ -48,6 +48,7 @@ export interface Property {
   longitude: number;
   imageUrl: string;
   minStay: string;
+  isFavorite: boolean;
   isActive: boolean;
   createdAt: string;
 }
