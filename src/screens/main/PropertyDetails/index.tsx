@@ -40,6 +40,7 @@ const PropertyDetails = () => {
             badges={[...currentProperty.amenities]}
             stats={{ seatsAvailable: 10, minStayMonths: currentProperty.minStay, priceFrom: 'LKR 15K' }}
             rooms={roomTypes ?? []}
+            propertyId={currentProperty.id}
             onViewRooms={(id, name) => {
               nav.navigate('RoomTypeDetails', {
                 roomTypeId: id,

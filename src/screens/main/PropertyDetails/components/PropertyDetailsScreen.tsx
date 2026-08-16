@@ -5,6 +5,7 @@ import AvailableRoomTypes from './AvailableRoomTypes';
 import { MapPin } from 'lucide-react-native';
 import { Colors } from '../../../../constant/colors';
 import { RoomType } from '../../../../types/properties';
+import ReviewsSection from './ReviewsSection';
 
 const ACCENT = '#FF6A39';
 const BORDER = '#E5E7EB';
@@ -21,6 +22,7 @@ interface PropertyDetailsScreenProps {
   badges: string[];     // e.g. ['Apartment', 'AC', 'Premium'] — first one is highlighted
   stats: PropertyStats;
   rooms: RoomType[];
+  propertyId: string;
   onViewRooms: (roomId: string, roomTypeName: string) => void;
 }
 
@@ -47,6 +49,7 @@ const PropertyDetailsScreen = ({
   badges,
   stats,
   rooms,
+  propertyId,
   onViewRooms,
 }: PropertyDetailsScreenProps) => {
   return (
@@ -71,6 +74,7 @@ const PropertyDetailsScreen = ({
       </View>
 
       <AvailableRoomTypes rooms={rooms} onViewRooms={onViewRooms} />
+      <ReviewsSection propertyId={propertyId} />
     </View>
   );
 };
