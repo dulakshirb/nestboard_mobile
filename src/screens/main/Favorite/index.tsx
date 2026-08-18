@@ -2,66 +2,84 @@ import {
   View,
   Text,
   FlatList,
-  TouchableOpacity,
   StyleSheet,
   ListRenderItemInfo,
 } from 'react-native';
-import React, { useCallback, useEffect, useState } from 'react';
-import { Heart } from 'lucide-react-native';
+import React, { useCallback, useMemo, useState } from 'react';
+import { Heart, LogIn } from 'lucide-react-native';
 import { PropertyAPI } from '../../../api/properties';
 import { PropertyItem as PItem } from '../../../types/properties';
 import PropertyItem from '../Home/components/PropertyItem';
 import { Colors } from '../../../constant/colors';
 import Typography from '../../../components/ui/Typography';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useFocusEffect } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import { useSelector, useDispatch } from 'react-redux';
+import { RootState } from '../../../store/store';
+import { logout } from '../../../store/authSlice';
+import { removeRefreshToken } from '../../../util/localStorage';
+import RegularButton from '../../../components/ui/RegularButton';
 
 const Favorite = () => {
   const insets = useSafeAreaInsets();
+  const nav: any = useNavigation();
+  const dispatch = useDispatch();
+  const accessToken = useSelector((state: RootState) => state.auth.accessToken);
+  const isLoggedIn = !!accessToken;
+  const favIds = useSelector((state: RootState) => state.favorites.ids);
+
   const [favorites, setFavorites] = useState<PItem[]>([]);
   const [loading, setLoading] = useState(true);
 
   const load = useCallback(() => {
+    if (!isLoggedIn) {
+      setLoading(false);
+      return;
+    }
     PropertyAPI.getFavorites()
       .then(setFavorites)
+      .catch(() => {})
       .finally(() => setLoading(false));
-  }, []);
+  }, [isLoggedIn]);
 
   useFocusEffect(load);
 
-  const remove = async (item: PItem) => {
-    try {
-      await PropertyAPI.toggleFavorite(item.id);
-      setFavorites((prev) => prev.filter((f) => f.id !== item.id));
-    } catch { }
-  };
+  const visibleFavorites = useMemo(
+    () => favorites.filter((f) => favIds[f.id]),
+    [favorites, favIds]
+  );
 
   return (
     <View style={[styles.container, { paddingTop: insets.top + 12 }]}>
       <Typography variant="h1">Favorites</Typography>
 
-      {loading ? (
+      {!isLoggedIn ? (
+        <View style={styles.emptyWrap}>
+          <Heart size={48} color={Colors.BORDER_GRAY} />
+          <Typography variant="subtitle" color={Colors.TEXT_GRAY} style={{ marginTop: 12 }}>
+            Sign in to view your saved properties
+          </Typography>
+          <RegularButton
+            Icon={<LogIn size={16} color={Colors.WHITE} />}
+            text="Sign In"
+            onPress={() => { dispatch(logout()); removeRefreshToken(); }}
+            marginTop={16}
+          />
+        </View>
+      ) : loading ? (
         <Text style={styles.hint}>Loading favorites...</Text>
-      ) : favorites.length === 0 ? (
+      ) : visibleFavorites.length === 0 ? (
         <Text style={styles.hint}>No favorites yet.</Text>
       ) : (
         <FlatList
-          data={favorites}
+          data={visibleFavorites}
           keyExtractor={(item) => item.id}
           contentContainerStyle={styles.list}
           renderItem={({ item, index }) => (
             <View style={styles.itemWrap}>
-              <PropertyItem dt={{ item, index } as ListRenderItemInfo<PItem>} />
-              <TouchableOpacity
-                style={styles.heart}
-                onPress={() => remove(item)}
-              >
-                <Heart
-                  size={20}
-                  color={Colors.PRIMARY_COLOR}
-                  fill={Colors.PRIMARY_COLOR}
-                />
-              </TouchableOpacity>
+              <PropertyItem
+                dt={{ item, index } as ListRenderItemInfo<PItem>}
+              />
             </View>
           )}
         />
@@ -85,20 +103,15 @@ const styles = StyleSheet.create({
   itemWrap: {
     position: 'relative',
   },
-  heart: {
-    position: 'absolute',
-    top: 12,
-    right: 12,
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: 'rgba(255,255,255,0.9)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
   hint: {
     marginTop: 48,
     textAlign: 'center',
     color: Colors.TEXT_GRAY,
+  },
+  emptyWrap: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingBottom: 80,
   },
 });

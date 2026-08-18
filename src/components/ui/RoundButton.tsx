@@ -6,10 +6,11 @@ import { Bell } from 'lucide-react-native'
 type Props = {
   Icon: any,
   orangeIndicator?: boolean,
+  badgeCount?: number,
   onPress?: ((event: GestureResponderEvent) => void) | undefined
 }
 
-const RoundButton = ({ Icon, orangeIndicator, onPress }: Props) => {
+const RoundButton = ({ Icon, orangeIndicator, badgeCount, onPress }: Props) => {
   return (
     <TouchableOpacity onPress={onPress} style={
       {
@@ -23,7 +24,7 @@ const RoundButton = ({ Icon, orangeIndicator, onPress }: Props) => {
       }
     }>
       {
-        orangeIndicator &&
+        orangeIndicator && (badgeCount === undefined || badgeCount === 0) &&
         <View style={{
           width: 8,
           height: 8,
@@ -34,8 +35,26 @@ const RoundButton = ({ Icon, orangeIndicator, onPress }: Props) => {
           right: 8
         }}></View>
       }
+      {
+        badgeCount !== undefined && badgeCount > 0 &&
+        <View style={{
+          minWidth: 18,
+          height: 18,
+          borderRadius: 9,
+          backgroundColor: Colors.PRIMARY_COLOR,
+          position: 'absolute',
+          top: 4,
+          right: 4,
+          alignItems: 'center',
+          justifyContent: 'center',
+          paddingHorizontal: 4,
+        }}>
+          <Text style={{ color: 'white', fontSize: 10, fontWeight: '700' }}>
+            {badgeCount > 99 ? '99+' : badgeCount}
+          </Text>
+        </View>
+      }
       {Icon}
-      {/* <Bell color={Colors.SECONDARY_COLOR} size={20} /> */}
     </TouchableOpacity>
   )
 }

@@ -19,7 +19,7 @@ export const useRoomTypeDetails = (roomTypeId: string) => {
           setRoomType(details)
         })
     }
-  }, [])
+  }, [currentProperty?.id, roomTypeId])
 
   return {
     roomType

@@ -46,7 +46,7 @@ const FilterPanel = forwardRef<BottomSheetModal, Props>(
     );
 
     const handleSheetChanges = useCallback((index: number) => {
-      console.log('handleSheetChanges', index);
+
     }, []);
 
     // [

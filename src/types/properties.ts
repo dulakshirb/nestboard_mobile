@@ -22,6 +22,7 @@ export type PropertyItem = {
   image: string;
   lat: number;
   lng: number;
+  isFavorite: boolean;
 }
 
 export interface Room {
@@ -64,7 +65,7 @@ export interface RoomType {
   roomsCount: number,
   seatCapacity: number,
   hasAC: boolean,
-  rooms: Room[]
+  rooms: RoomWithSeats[]
 }
 
 export interface Seat {
@@ -73,7 +74,7 @@ export interface Seat {
   tenantBio: string
 }
 
-export interface Room {
+export interface RoomWithSeats {
   roomId: string,
   roomName: string,
   booking: Seat[]

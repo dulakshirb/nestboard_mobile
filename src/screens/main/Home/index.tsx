@@ -1,5 +1,5 @@
-import { View, Text } from 'react-native'
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import { View, TouchableOpacity } from 'react-native'
+import React, { useCallback, useRef, useState } from 'react'
 import { styles } from './styles'
 import LocationContainer from './components/LocationContainer'
 import SearchContainer from './components/SearchContainer'
@@ -10,6 +10,8 @@ import PropertyList from './components/PropertyList'
 import { usePropertyList } from '../../../hooks/usePropertyList'
 import { BottomSheetModal } from '@gorhom/bottom-sheet'
 import FilterPanel from './components/FilterPanel'
+import Typography from '../../../components/ui/Typography'
+import { useFocusEffect } from '@react-navigation/native'
 
 
 
@@ -34,12 +36,17 @@ const Home = () => {
     bottomSheetModalRef.current?.dismiss();
   }
 
-  const { properties, fetchNextBatch, fetching } = usePropertyList(currentPType, range, checkedCities, triggerFilter);
+  const { properties, fetchNextBatch, fetching, refresh, refreshing, error } = usePropertyList(currentPType, range, checkedCities, triggerFilter);
 
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
 
-  console.log("checkedCities", checkedCities)
-  console.log("range", range)
+  useFocusEffect(
+    useCallback(() => {
+      refresh();
+    }, [])
+  );
+
+
 
   // callbacks
   const openFilterPanel = useCallback(() => {
@@ -54,20 +61,16 @@ const Home = () => {
       <View style={
         {
           flexDirection: 'row',
-          justifyContent: 'space-between'
+          justifyContent: 'space-between',
+          alignItems: 'center'
         }
       }>
-        <Text style={{
-          fontSize: 24,
-          fontWeight: '700'
-        }}>Popular</Text>
-        <Text style={{
-          fontSize: 16,
-          fontWeight: '500',
-          color: Colors.TEXT_GRAY
-        }}>See all</Text>
+        <Typography variant="h2">Popular</Typography>
+        <TouchableOpacity>
+          <Typography variant="body" color={Colors.TEXT_GRAY}>See all</Typography>
+        </TouchableOpacity>
       </View>
-      <PropertyList properties={properties} fetchNextBatch={fetchNextBatch} fetching={fetching} />
+      <PropertyList properties={properties} fetchNextBatch={fetchNextBatch} fetching={fetching} refresh={refresh} refreshing={refreshing} error={error} />
       <FilterPanel
         ref={bottomSheetModalRef}
         checkedCities={checkedCities}

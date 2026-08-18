@@ -4,6 +4,17 @@ import { apiClient } from "./apiClient"
 
 export const PropertyAPI = {
 
+  searchProperties: async (query: string, page = 1, limit = 10) => {
+    const params = new URLSearchParams();
+    params.append("page", page + "");
+    params.append("limit", limit + "");
+    if (query.trim()) {
+      params.append("search", query.trim());
+    }
+    const d = await apiClient.get<PropertyListResponse>('properties?' + params.toString());
+    return d.data;
+  },
+
   getAllProperties: async (page: number, limit: number,
     type: PropertyType, range: {
       min: number;

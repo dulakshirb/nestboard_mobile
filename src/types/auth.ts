@@ -13,9 +13,7 @@ export interface AuthTokens {
   refreshToken: string;
 }
 
-export interface AuthResponse extends AuthTokens {
-  user: User;
-}
+export type AuthResponse = AuthTokens;
 
 export interface LoginPayload {
   email: string;

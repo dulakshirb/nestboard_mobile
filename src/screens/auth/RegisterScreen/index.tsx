@@ -17,6 +17,7 @@ import { useDispatch } from "react-redux";
 import { saveToken } from "../../../store/authSlice";
 import { persistLogin } from "../../../util/localStorage";
 import { useNavigation } from "@react-navigation/native";
+import useSocialAuth from "../../../hooks/useSocialAuth";
 
 export default function SignupScreen() {
   const [displayName, setDisplayName] = useState("");
@@ -29,6 +30,7 @@ export default function SignupScreen() {
   const nav: any = useNavigation();
 
   const dispatch = useDispatch();
+  const { authGoogle, loading: googleLoading } = useSocialAuth();
 
   const registerAccount = async () => {
     setError(null);
@@ -50,7 +52,7 @@ export default function SignupScreen() {
         password,
         displayName
       });
-      console.log("data ", data)
+
       // Save the tokens inside the global state using redux
       dispatch(saveToken({
         accessToken: data.accessToken,
@@ -60,7 +62,6 @@ export default function SignupScreen() {
       //Save the refresh token inside the device storage
       persistLogin(data.refreshToken)
     } catch (err: any) {
-      console.log("err.response", err.response)
       if (err.response?.status === 401) {
         setError('Invalid email or password');
       } else {
@@ -130,8 +131,8 @@ export default function SignupScreen() {
           Icon={undefined}
           variant="outline"
           text={"Join with Google"}
-          onPress={registerAccount}
-          loading={loading}
+          onPress={authGoogle}
+          loading={googleLoading}
         />
 
         <TouchableOpacity onPress={() => nav.navigate('Login')}>
@@ -152,8 +153,8 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 16,
     borderTopRightRadius: 16,
   },
-  title: { fontSize: 24, fontWeight: '700', color: '#111827' },
-  subtitle: { fontSize: 14, color: '#6B7280', marginTop: 4, marginBottom: 24 },
+  title: { fontSize: 24, fontWeight: '700', color: Colors.TEXT_PRIMARY },
+  subtitle: { fontSize: 14, color: Colors.TEXT_GRAY, marginTop: 4, marginBottom: 24 },
   label: { fontSize: 13, fontWeight: '600', color: '#111827', marginBottom: 6 },
   inputWrapper: {
     flexDirection: 'row', alignItems: 'center',
@@ -161,16 +162,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12, paddingVertical: 10, marginBottom: 16, gap: 8,
   },
   input: { flex: 1, fontSize: 14, color: '#111827' },
-  textHint: { color: 'rgb(139, 139, 139)626', fontSize: 13, marginBottom: 12 },
+  textHint: { color: Colors.TEXT_GRAY, fontSize: 13, marginBottom: 12 },
   error: { color: '#DC2626', fontSize: 13, marginBottom: 12 },
   button: {
-    backgroundColor: '#E8623A', borderRadius: 12,
+    backgroundColor: Colors.PRIMARY_COLOR, borderRadius: 12,
     paddingVertical: 14, alignItems: 'center', marginTop: 8,
   },
   buttonText: { color: '#fff', fontWeight: '700', fontSize: 15 },
   dividerText: { fontSize: 13 },
-  footerText: { textAlign: 'center', color: '#6B7280', fontSize: 13, marginTop: 24 },
-  link: { color: '#E8623A', fontWeight: '700' },
+  footerText: { textAlign: 'center', color: Colors.TEXT_GRAY, fontSize: 13, marginTop: 24 },
+  link: { color: Colors.PRIMARY_COLOR, fontWeight: '700' },
   nest: {
     color: Colors.SECONDARY_COLOR,
     fontSize: 30,

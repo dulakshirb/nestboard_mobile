@@ -3,14 +3,14 @@ import React, { useState } from 'react'
 import Typography from '../../../../components/ui/Typography'
 import { Colors } from '../../../../constant/colors'
 import RegularButton from '../../../../components/ui/RegularButton'
-import { Room } from '../../../../types/properties'
+import { RoomWithSeats } from '../../../../types/properties'
 import { Plus } from 'lucide-react-native'
 import { useNavigation } from '@react-navigation/native'
 import { useDispatch } from 'react-redux'
 import { updateBookingDetails } from '../../../../store/bookingSlice'
 
 type Props = {
-  room: Room,
+  room: RoomWithSeats,
   price: string
 }
 
@@ -18,9 +18,7 @@ const RoomCard = ({ room, price }: Props) => {
 
   const extractTwoFirstLetters = (tenant: string) => {
     if (tenant.length > 0) {
-      console.log("tenant", tenant)
       const twoNames = tenant.split(' ');
-      // console.log("dddd ", twoNames[0].charAt(0).toUpperCase() + "" + twoNames[1].charAt(0).toUpperCase())
       return (twoNames.length > 1) ?
         twoNames[0].charAt(0).toUpperCase() + "" + twoNames[1].charAt(0).toUpperCase()
         :
@@ -36,7 +34,6 @@ const RoomCard = ({ room, price }: Props) => {
   const dispatch = useDispatch();
 
   const bookThisSeat = () => {
-    console.log("room", room.roomName)
     dispatch(updateBookingDetails({
       date: "",
       duration: 0,
@@ -120,7 +117,7 @@ const RoomCard = ({ room, price }: Props) => {
             borderRadius: 100
           }
         }>
-          <Typography color='#10B981'>{room.booking.filter(seat => seat.tenant == "").length} Availalbe</Typography>
+          <Typography color='#10B981'>{room.booking.filter(seat => seat.tenant == "").length} Available</Typography>
         </View>
 
         {/* Booking button */}

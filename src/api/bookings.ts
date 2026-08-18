@@ -14,8 +14,18 @@ export const BookingAPI = {
     return d.data;
   },
 
+  createBookingConfirmed: async (input: CreateBookingInput) => {
+    const d = await apiClient.put<Booking>("bookings", input);
+    return d.data;
+  },
+
   confirmBooking: async (id: string) => {
     const d = await apiClient.post<Booking>(`bookings/${id}/confirm`);
+    return d.data;
+  },
+
+  cancelBooking: async (id: string) => {
+    const d = await apiClient.post<Booking>(`bookings/${id}/cancel`);
     return d.data;
   },
 

@@ -3,7 +3,9 @@ import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import Typography from '../../../../components/ui/Typography';
 import { RoomType } from '../../../../types/properties';
 
-const ACCENT = '#FF6A39';
+import { Colors } from '../../../../constant/colors';
+
+const ACCENT = Colors.PRIMARY_COLOR;
 
 interface RoomCardProps {
   room: RoomType;

@@ -1,5 +1,5 @@
 import { View, Text, StyleSheet } from "react-native";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import ConfirmScreenHeader from "./components/Header";
 import Typography from "../../../components/ui/Typography";
 import { useSelector } from "react-redux";
@@ -23,7 +23,8 @@ const currentYear = new Date().getFullYear();
 
 const Years: number[] = [currentYear, currentYear + 1, currentYear + 2];
 
-// Converts a picker value like "2026-Jul" into "2026-07"
+const COUNTDOWN_SECONDS = 10 * 60; // 10 minutes
+
 const toMonthIso = (pickerValue: string) => {
   const [year, monthAbbr] = pickerValue.split("-");
   const index = Months.indexOf(monthAbbr);
@@ -46,11 +47,35 @@ const ConfirmBooking = () => {
 
   const [booking, setBooking] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [countdown, setCountdown] = useState(COUNTDOWN_SECONDS);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const total = useMemo(
     () => (parseFloat(pricePerSeat + "") * duration).toFixed(2),
     [pricePerSeat, duration],
   );
+
+  useEffect(() => {
+    timerRef.current = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev <= 1) {
+          if (timerRef.current) clearInterval(timerRef.current);
+          nav.goBack();
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, [nav]);
+
+  const formatCountdown = (secs: number) => {
+    const m = Math.floor(secs / 60);
+    const s = secs % 60;
+    return `${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
+  };
 
   useEffect(() => {
     if (fromDate && toDate) {
@@ -76,13 +101,13 @@ const ConfirmBooking = () => {
 
     setBooking(true);
     try {
-      const created = await BookingAPI.createBooking({
+      await BookingAPI.createBookingConfirmed({
         roomId,
         seatNumber: seatIndex,
         startMonth,
         durationMonths: duration,
       });
-      await BookingAPI.confirmBooking(created.id);
+      if (timerRef.current) clearInterval(timerRef.current);
       nav.navigate("MyBookings");
     } catch (err: any) {
       setError(
@@ -93,6 +118,8 @@ const ConfirmBooking = () => {
       setBooking(false);
     }
   };
+
+  const isExpired = countdown <= 0;
 
   return (
     <View style={styles.container}>
@@ -169,15 +196,22 @@ const ConfirmBooking = () => {
 
       {error && <Text style={styles.error}>{error}</Text>}
 
+      <View style={styles.countdownRow}>
+        <Text style={styles.countdownLabel}>Seat hold expires in</Text>
+        <Text style={[styles.countdownTimer, countdown <= 60 && styles.countdownUrgent]}>
+          {formatCountdown(countdown)}
+        </Text>
+      </View>
+
       <RegularButton
         Icon={<Lock color={"white"} />}
         loading={booking}
-        disable={duration < 1 || booking}
+        disable={duration < 1 || booking || isExpired}
         onPress={bookNow}
-        text={"Pay LKR " + total}
+        text={isExpired ? "Session expired" : "Pay LKR " + total}
       />
       <Typography variant="caption" style={{ textAlign: "center" }}>
-        Full payment is required upfront for the entire
+        Full payment is required upfront for the entire lease period.
       </Typography>
     </View>
   );
@@ -222,5 +256,26 @@ const styles = StyleSheet.create({
     color: "#DC2626",
     fontSize: 13,
     textAlign: "center",
+  },
+  countdownRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    backgroundColor: "#FFF7ED",
+    borderRadius: 12,
+    padding: 12,
+  },
+  countdownLabel: {
+    color: Colors.TEXT_GRAY,
+    fontSize: 13,
+  },
+  countdownTimer: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: Colors.PRIMARY_COLOR,
+    fontVariant: ["tabular-nums"],
+  },
+  countdownUrgent: {
+    color: "#DC2626",
   },
 });

@@ -4,15 +4,18 @@ import { store } from "../store/store";
 import { logout, saveToken } from "../store/authSlice";
 import { persistLogin, removeRefreshToken } from "../util/localStorage";
 import { Platform } from "react-native";
+import {
+  API_URL_ANDROID,
+  API_URL_IOS,
+} from "@env";
+
 const storage = createAsyncStorage("appDB");
 
-const ANDROID_IP = "10.0.2.2"
-const IOS_IP = "127.0.0.1"
+const API_URL =
+  Platform.OS === "android" ? API_URL_ANDROID : API_URL_IOS;
 
 export const apiClient = axios.create({
-  baseURL: `http://${(Platform.OS == 'android') ? ANDROID_IP : IOS_IP}:3001/api/`, //127.0.0.1
-  // baseURL: 'https://fed-backend-k7mo.onrender.com/api/',
-  //"http://172.20.10.5:3001/api/" + "properties"
+  baseURL: API_URL,
   headers: {
     'Content-Type': 'application/json',
     'Accept': 'application/json',
@@ -28,16 +31,41 @@ apiClient.interceptors.request.use((config) => {
   return config;
 });
 
+// Token refresh mutex — only one refresh at a time
+let isRefreshing = false;
+let failedQueue: Array<{
+  resolve: (token: string) => void;
+  reject: (err: unknown) => void;
+}> = [];
+
+function processQueue(err: unknown, token: string | null = null) {
+  failedQueue.forEach((p) => (err ? p.reject(err) : p.resolve(token!)));
+  failedQueue = [];
+}
+
 // Response interceptor — refresh on 401, then retry once
 apiClient.interceptors.response.use(
   (res) => res,
   async (error) => {
     const original = error.config;
     if (error.response?.status === 401 && !original._retry) {
+      if (isRefreshing) {
+        return new Promise<string>((resolve, reject) => {
+          failedQueue.push({ resolve, reject });
+        }).then((token) => {
+          original.headers.Authorization = `Bearer ${token}`;
+          return apiClient(original);
+        });
+      }
+
       original._retry = true;
+      isRefreshing = true;
+
       const { refreshToken } = store.getState().auth;
       if (!refreshToken) {
-        store.dispatch(logout())
+        isRefreshing = false;
+        processQueue(error);
+        store.dispatch(logout());
         return Promise.reject(error);
       }
       try {
@@ -50,16 +78,18 @@ apiClient.interceptors.response.use(
           refreshToken: data.refreshToken,
         }));
         persistLogin(data.refreshToken);
+        processQueue(null, data.accessToken);
         original.headers.Authorization = `Bearer ${data.accessToken}`;
         return apiClient(original);
       } catch (refreshErr) {
+        processQueue(refreshErr);
         store.dispatch(logout());
-        removeRefreshToken();
+        await removeRefreshToken();
         return Promise.reject(refreshErr);
+      } finally {
+        isRefreshing = false;
       }
     }
     return Promise.reject(error);
   }
 );
-
-

@@ -27,7 +27,6 @@ const PropertyMap = () => {
       timeout: 60000,
     })
       .then(location => {
-        console.log("location", location)
         setCurrentLocation(location)
       })
       .catch(error => {
@@ -38,7 +37,6 @@ const PropertyMap = () => {
 
   const getProperties = () => {
     PropertyAPI.getMapList().then(d => {
-      console.log("locations -----> ", d)
       setProperties(d)
     })
   }

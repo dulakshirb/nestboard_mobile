@@ -33,7 +33,7 @@ export const useSocialAuth = () => {
         throw new Error('No ID token returned from Google');
       }
 
-      console.log("idToken", idToken);
+
 
       const tokens = await AuthAPI.socialAuth(idToken);
 

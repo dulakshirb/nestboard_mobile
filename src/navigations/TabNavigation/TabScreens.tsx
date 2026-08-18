@@ -48,14 +48,14 @@ const TabScreens = () => {
         }
       } component={Home}
       />
-      <Tab.Screen name='Search' component={Search} />
+      <Tab.Screen name='Search' component={Search} options={{ headerShown: false }} />
       <Tab.Screen name='Favorite' component={Favorite} />
       <Tab.Screen name='PropertyMap' component={PropertyMap} options={
         {
           headerShown: false
         }
       } />
-      <Tab.Screen name='Profile' component={Profile} />
+      <Tab.Screen name='Profile' component={Profile} options={{ headerShown: false }} />
     </Tab.Navigator>
   )
 }
