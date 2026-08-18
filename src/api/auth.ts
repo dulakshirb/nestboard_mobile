@@ -39,4 +39,20 @@ export const AuthAPI = {
     const d = await apiClient.patch<User>('users/profile', data);
     return d.data;
   },
+
+  uploadAvatar: async (filePath: string) => {
+    const formData = new FormData();
+    const filename = filePath.split('/').pop() || 'avatar.jpg';
+    const ext = filename.split('.').pop()?.toLowerCase() || 'jpg';
+    const mimeType = ext === 'png' ? 'image/png' : ext === 'webp' ? 'image/webp' : 'image/jpeg';
+    formData.append('avatar', {
+      uri: filePath,
+      name: filename,
+      type: mimeType,
+    } as any);
+    const d = await apiClient.patch<User>('users/profile', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return d.data;
+  },
 };

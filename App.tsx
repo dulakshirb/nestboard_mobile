@@ -9,7 +9,6 @@ import { StyleSheet, View } from 'react-native';
 import {
   SafeAreaProvider,
 } from 'react-native-safe-area-context';
-import { NavigationContainer } from '@react-navigation/native';
 import { Provider } from 'react-redux';
 import RootStack from './src/navigations/RootStack';
 import { store } from './src/store/store';

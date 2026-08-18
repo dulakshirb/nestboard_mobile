@@ -7,8 +7,8 @@ import { Colors } from '../../../../constant/colors';
 import { RoomType } from '../../../../types/properties';
 import ReviewsSection from './ReviewsSection';
 
-const ACCENT = '#FF6A39';
-const BORDER = '#E5E7EB';
+const ACCENT = Colors.PRIMARY_COLOR;
+const BORDER = Colors.BORDER_GRAY;
 
 interface PropertyStats {
   seatsAvailable: number;
@@ -112,7 +112,7 @@ const styles = StyleSheet.create({
   },
   chipActive: {
     backgroundColor: '#FFE9E0',
-    borderColor: '#FFE9E0',
+    borderColor: Colors.PRIMARY_COLOR,
   },
   statsRow: {
     flexDirection: 'row',

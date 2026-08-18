@@ -1,13 +1,16 @@
 import { View, Text, TouchableOpacity, StyleSheet, Button } from 'react-native'
-import React from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { Bell, QrCode } from 'lucide-react-native'
 import { Colors } from '../../../../constant/colors'
 import RoundButton from '../../../../components/ui/RoundButton'
-import { useNavigation } from '@react-navigation/native'
+import { useFocusEffect, useNavigation } from '@react-navigation/native'
 import { useDispatch } from 'react-redux'
 import { logout } from '../../../../store/authSlice'
 import { removeRefreshToken } from '../../../../util/localStorage'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { NotificationsAPI } from '../../../../api/notifications'
+import { useSelector } from 'react-redux'
+import { RootState } from '../../../../store/store'
 
 const Header = () => {
 
@@ -15,6 +18,26 @@ const Header = () => {
   const dispatch = useDispatch();
 
   const insets = useSafeAreaInsets();
+  const [unreadCount, setUnreadCount] = useState(0);
+  const accessToken = useSelector((state: RootState) => state.auth.accessToken);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const checkUnread = useCallback(() => {
+    if (!accessToken) return;
+    NotificationsAPI.unreadCount()
+      .then((res) => setUnreadCount(res.count))
+      .catch(() => {});
+  }, [accessToken]);
+
+  useFocusEffect(
+    useCallback(() => {
+      checkUnread();
+      intervalRef.current = setInterval(checkUnread, 30000);
+      return () => {
+        if (intervalRef.current) clearInterval(intervalRef.current);
+      };
+    }, [checkUnread])
+  );
 
   return (
     <View style={[styles.container, {
@@ -39,8 +62,9 @@ const Header = () => {
         />
         <RoundButton
           Icon={<Bell color={Colors.SECONDARY_COLOR} size={20} />}
-          orangeIndicator
-          onPress={() => { }}
+          orangeIndicator={unreadCount > 0}
+          badgeCount={unreadCount}
+          onPress={() => nav.navigate('Notifications')}
         />
       </View>
     </View>

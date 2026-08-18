@@ -1,18 +1,16 @@
 import { View, Text } from 'react-native'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect } from 'react'
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import SplashScreen from '../screens/splash'
-import AuthStack from './AuthStack'
 import { checkStatus } from '../util/localStorage'
 import MainStack from './MainStack'
-import { useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { initAuth } from '../store/authSlice'
 import { LinkingOptions, NavigationContainer } from '@react-navigation/native'
+import { RootState } from '../store/store'
 
 const Stack = createNativeStackNavigator()
 
-//nestboard://property/897a4dd4-6268-4fdb-950d-98a11b2f2e6b
-//nestboard://profile/user/123
 const linking: LinkingOptions<any> = {
   prefixes: ['nestboard://'],
   config: {
@@ -22,7 +20,7 @@ const linking: LinkingOptions<any> = {
           AppStack: {
             screens: {
               PropertyDetails: 'property/:pid',
-              Profile: 'profile/user/:id'
+              QrScan: 'scan',
             },
           },
         },
@@ -31,29 +29,23 @@ const linking: LinkingOptions<any> = {
   },
 }
 
-
 const RootStack = () => {
 
-  const [loading, setLoading] = useState(true);
   const dispatch = useDispatch();
+  const authChecked = useSelector((st: RootState) => st.auth.authChecked);
 
   useEffect(() => {
-    setTimeout(() => {
-
-      checkStatus().then(refreshToken => {
-        if (refreshToken) {
-          dispatch(initAuth({
-            refreshToken: refreshToken
-          }))
-        }
-        setLoading(false);
+    checkStatus()
+      .then(refreshToken => {
+        dispatch(initAuth({ refreshToken: refreshToken ?? null }));
       })
+      .catch(() => {
+        dispatch(initAuth({ refreshToken: null }));
+      });
+  }, [dispatch]);
 
-    }, 500)
-  }, [])
-
-  if (loading) {
-    return <SplashScreen />
+  if (!authChecked) {
+    return <SplashScreen />;
   }
 
   return (

@@ -35,11 +35,14 @@ import { Colors } from '../../../../constant/colors';
 type Props = {
   properties: PItem[],
   fetchNextBatch: () => void,
-  fetching: boolean
+  fetching: boolean,
+  refresh?: () => void,
+  refreshing?: boolean,
+  error?: string | null,
 }
 
 const PropertyList = ({
-  fetchNextBatch, fetching, properties
+  fetchNextBatch, fetching, properties, refresh, refreshing, error
 }: Props) => {
 
   const height = 320;
@@ -55,8 +58,23 @@ const PropertyList = ({
         data={properties}
         keyExtractor={(data) => data.id}
         renderItem={(dt) => <PropertyItem dt={dt} />}
+        onRefresh={refresh}
+        refreshing={refreshing ?? false}
         ListEmptyComponent={() => {
           return (
+            error ?
+              <View style={
+                {
+                  width: '100%',
+                  aspectRatio: 1,
+                  justifyContent: 'center',
+                  alignItems: 'center'
+                }
+              }>
+                <FileQuestionMark color={Colors.ICON_GRAY} size={100} />
+                <Typography color={Colors.TEXT_GRAY}>{error}</Typography>
+              </View>
+              :
             (fetching) ?
               <>
                 <PropertyItemSkeleton />
@@ -102,6 +120,18 @@ export const styles = (height: number) => StyleSheet.create({
     width: '100%',
     height: height,
     overflow: 'hidden'
+  },
+  favoriteButton: {
+    position: 'absolute',
+    top: 16,
+    left: 16,
+    zIndex: 1,
+    backgroundColor: 'rgba(0,0,0,0.3)',
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   ratingContainer: {
     backgroundColor: 'white',

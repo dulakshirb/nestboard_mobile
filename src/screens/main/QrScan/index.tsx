@@ -1,4 +1,4 @@
-import { View, Text, Linking } from 'react-native'
+import { View, Text, Linking, StyleSheet, Alert } from 'react-native'
 import React, { useEffect, useRef } from 'react'
 import {
   Camera,
@@ -6,37 +6,69 @@ import {
   useCameraPermission,
   useCodeScanner,
 } from 'react-native-vision-camera';
+import { useNavigation } from '@react-navigation/native';
+import { Colors } from '../../../constant/colors';
+import { PropertyAPI } from '../../../api/properties';
 
+const NESTBOARD_PREFIX = 'nestboard://';
 
 const QrScan = () => {
-
   const device = useCameraDevice('back');
-
-  const link = useRef("");
+  const nav: any = useNavigation();
+  const scanned = useRef(false);
 
   const { hasPermission, requestPermission } = useCameraPermission();
 
   useEffect(() => {
     if (!hasPermission) requestPermission();
   }, [hasPermission]);
-  //nestboard://property/e203d2f5-dd48-4955-9a95-7ede5262d363
+
   const codeScanner = useCodeScanner({
     codeTypes: ['qr'],
     onCodeScanned: (codes) => {
-      if (codes.length > 0) {
-        if (link.current == "") {
-          link.current = codes[0].value + "";
-          console.log('Scanned value:', link.current);
-          Linking.openURL(link.current)
+      if (codes.length > 0 && !scanned.current) {
+        scanned.current = true;
+        const value = codes[0].value ?? '';
+
+        if (value.startsWith(NESTBOARD_PREFIX)) {
+          const path = value.slice(NESTBOARD_PREFIX.length);
+          const segments = path.split('/').filter(Boolean);
+
+          if (segments[0] === 'property' && segments[1]) {
+            const pid = segments[1];
+            PropertyAPI.getSingleProperty(pid)
+              .then((property) => {
+                if (property && 'isActive' in property && !property.isActive) {
+                  Alert.alert(
+                    'Inactive Property',
+                    'This property is currently unavailable.',
+                    [{ text: 'OK', onPress: () => { scanned.current = false; } }],
+                  );
+                } else {
+                  nav.replace('PropertyDetails', { pid });
+                }
+              })
+              .catch(() => {
+                Alert.alert(
+                  'Property Not Found',
+                  'This property could not be found.',
+                  [{ text: 'OK', onPress: () => { scanned.current = false; } }],
+                );
+              });
+          } else {
+            Linking.openURL(value);
+          }
+        } else if (value.startsWith('http://') || value.startsWith('https://')) {
+          Linking.openURL(value);
+        } else {
+          scanned.current = false;
         }
-        // console.log('Scanned value:', codes[0].value);
-        // handle the scanned value here
       }
     },
   });
 
-  if (!hasPermission) return <Text>Camera permission required</Text>;
-  if (device == null) return <Text>No camera device found</Text>;
+  if (!hasPermission) return <Text style={styles.msg}>Camera permission required</Text>;
+  if (device == null) return <Text style={styles.msg}>No camera device found</Text>;
 
   return (
     <Camera
@@ -48,4 +80,14 @@ const QrScan = () => {
   )
 }
 
-export default QrScan
+export default QrScan;
+
+const styles = StyleSheet.create({
+  msg: {
+    flex: 1,
+    textAlign: 'center',
+    textAlignVertical: 'center',
+    color: Colors.TEXT_GRAY,
+    fontSize: 14,
+  },
+});

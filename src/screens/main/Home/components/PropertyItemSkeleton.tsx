@@ -19,6 +19,7 @@ export const PropertyItemSkeleton = () => {
     <Skeleton height={height} width={'100%'} style={{
       justifyContent: 'flex-end'
     }} >
+      <Skeleton style={styles_.favoriteButton} width={36} />
       <Skeleton style={styles_.ratingContainer} width={60} />
       <View style={
         {

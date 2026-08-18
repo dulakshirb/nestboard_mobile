@@ -7,6 +7,7 @@ import { useNavigation } from '@react-navigation/native';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../../../../store/store';
 import { saveProperty } from '../../../../store/propertySlice';
+import { toggleFavorite as toggleFavoriteAction } from '../../../../store/favoritesSlice';
 import { PropertyAPI } from '../../../../api/properties';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -18,14 +19,20 @@ const PropertyHeader = () => {
   const currentProperty = useSelector(
     (state: RootState) => state.property.currentProperty,
   );
-  const favorited = currentProperty?.isFavorite ?? false;
+  const isFav = useSelector(
+    (state: RootState) => !!state.favorites.ids[currentProperty?.id ?? '']
+  );
 
   const toggleFavorite = async () => {
     if (!currentProperty) return;
+    dispatch(toggleFavoriteAction(currentProperty.id));
+    dispatch(saveProperty({ ...currentProperty, isFavorite: !isFav }));
     try {
       await PropertyAPI.toggleFavorite(currentProperty.id);
-      dispatch(saveProperty({ ...currentProperty, isFavorite: !favorited }));
-    } catch { }
+    } catch {
+      dispatch(toggleFavoriteAction(currentProperty.id));
+      dispatch(saveProperty({ ...currentProperty, isFavorite: isFav }));
+    }
   };
 
   return (
@@ -40,9 +47,9 @@ const PropertyHeader = () => {
       <RoundButton
         Icon={
           <Heart
-            color={favorited ? Colors.PRIMARY_COLOR : Colors.SECONDARY_COLOR}
+            color={isFav ? Colors.PRIMARY_COLOR : Colors.SECONDARY_COLOR}
             size={20}
-            fill={favorited ? Colors.PRIMARY_COLOR : 'transparent'}
+            fill={isFav ? Colors.PRIMARY_COLOR : 'transparent'}
           />
         }
         onPress={toggleFavorite}

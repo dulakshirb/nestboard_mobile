@@ -7,6 +7,8 @@ import TabScreens from './TabNavigation/TabScreens'
 import RoomTypeDetails from '../screens/main/RoomList'
 import ConfirmBooking from '../screens/main/ConfirmBooking'
 import MyBookings from "../screens/main/MyBookings";
+import EditProfile from '../screens/main/EditProfile'
+import Notifications from '../screens/main/Notifications'
 import QrScan from '../screens/main/QrScan'
 
 const Stack = createNativeStackNavigator()
@@ -30,6 +32,8 @@ const AppStack = () => {
         headerTransparent: true
       }} />
       <Stack.Screen name="MyBookings" component={MyBookings} options={{ headerShown: false }} />
+      <Stack.Screen name="EditProfile" component={EditProfile} options={{ headerShown: false }} />
+      <Stack.Screen name="Notifications" component={Notifications} options={{ headerShown: false }} />
       <Stack.Screen name='QrScan' component={QrScan} options={{
         headerShown: false,
         headerTransparent: true

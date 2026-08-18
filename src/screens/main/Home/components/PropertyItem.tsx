@@ -1,11 +1,15 @@
-import { View, Text, TouchableOpacity, ListRenderItemInfo, ImageBackground } from 'react-native'
-import React, { useMemo } from 'react'
+import { View, Text, Pressable, ListRenderItemInfo, ImageBackground } from 'react-native'
+import React, { useMemo, useCallback, useRef } from 'react'
 import { useNavigation } from '@react-navigation/native';
 import { styles } from './PropertyList';
 import LinearGradient from 'react-native-linear-gradient';
-import { Star } from 'lucide-react-native';
+import { Star, Heart } from 'lucide-react-native';
 import { Colors } from '../../../../constant/colors';
 import { PropertyItem as PItem } from '../../../../types/properties';
+import { PropertyAPI } from '../../../../api/properties';
+import { useSelector, useDispatch } from 'react-redux';
+import { RootState } from '../../../../store/store';
+import { toggleFavorite as toggleFavoriteAction } from '../../../../store/favoritesSlice';
 
 type Props = {
   dt: ListRenderItemInfo<PItem>
@@ -17,18 +21,48 @@ export const PropertyItem = ({ dt }: Props) => {
 
   const nav: any = useNavigation();
   const styles_ = useMemo(() => styles(height), [height]);
+  const dispatch = useDispatch();
+  const favTapped = useRef(false);
+
+  const isFav = useSelector(
+    (state: RootState) => !!state.favorites.ids[dt.item.id]
+  );
+
+  const toggleFavorite = useCallback(() => {
+    favTapped.current = true;
+    dispatch(toggleFavoriteAction(dt.item.id));
+    PropertyAPI.toggleFavorite(dt.item.id).catch(() => {
+      dispatch(toggleFavoriteAction(dt.item.id));
+    });
+  }, [dt.item.id, dispatch]);
+
+  const handleCardPress = useCallback(() => {
+    if (favTapped.current) {
+      favTapped.current = false;
+      return;
+    }
+    nav.navigate('PropertyDetails', {
+      pid: dt.item.id
+    });
+  }, [nav, dt.item.id]);
 
   return (
-    <TouchableOpacity onPress={() => {
-      nav.navigate('PropertyDetails', {
-        pid: dt.item.id
-      })
-    }} style={styles_.propertContainer}>
+    <Pressable onPress={handleCardPress} style={styles_.propertContainer}>
       <ImageBackground style={styles_.imageBackground} source={
         {
           uri: dt.item.image
         }
       }>
+        <Pressable
+          onPress={toggleFavorite}
+          style={styles_.favoriteButton}
+        >
+          <Heart
+            color={isFav ? Colors.PRIMARY_COLOR : 'white'}
+            size={20}
+            fill={isFav ? Colors.PRIMARY_COLOR : 'transparent'}
+          />
+        </Pressable>
         <LinearGradient style={styles_.gradientBackground}
           colors={['rgba(0, 0, 0, 0)', 'rgba(0, 0, 0,255)']}>
           <View>
@@ -43,10 +77,10 @@ export const PropertyItem = ({ dt }: Props) => {
         </LinearGradient>
       </ImageBackground>
       <View style={styles_.ratingContainer}>
-        <Star color={Colors.PRIMARY_COLOR} />
+        <Star color={Colors.PRIMARY_COLOR} fill={Colors.PRIMARY_COLOR} />
         <Text style={styles_.ratingText}>{dt.item.rating}</Text>
       </View>
-    </TouchableOpacity>
+    </Pressable>
   )
 }
 

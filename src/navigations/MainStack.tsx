@@ -12,7 +12,7 @@ const MainStack = () => {
   const isAuth = useSelector((st: RootState) => st.auth.isAuthenticated)
 
   useEffect(() => {
-    console.log("IS auth", isAuth)
+
   }, [isAuth])
 
   return (

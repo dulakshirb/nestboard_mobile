@@ -13,7 +13,7 @@ export const checkStatus = async () => {
 }
 
 export const removeRefreshToken = async () => {
-  storage.removeItem("refreshToken")
+  await storage.removeItem("refreshToken")
 }
 
 

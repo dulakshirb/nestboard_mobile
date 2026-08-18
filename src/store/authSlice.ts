@@ -5,12 +5,14 @@ export interface AuthState {
   refreshToken: string,
   accessToken: string,
   isAuthenticated: boolean,
+  authChecked: boolean,
 }
 
 const initialState: AuthState = {
   refreshToken: "",
   accessToken: "",
-  isAuthenticated: false
+  isAuthenticated: false,
+  authChecked: false,
 }
 
 export const authSlice = createSlice({
@@ -26,19 +28,22 @@ export const authSlice = createSlice({
       state.isAuthenticated = true;
     },
     initAuth: (state, action: PayloadAction<{
-      refreshToken: string,
+      refreshToken: string | null,
     }>) => {
-      state.refreshToken = action.payload.refreshToken
-      state.isAuthenticated = true;
+      if (action.payload.refreshToken) {
+        state.refreshToken = action.payload.refreshToken
+        state.isAuthenticated = true;
+      }
+      state.authChecked = true;
     },
     logout: (state) => {
       state.refreshToken = ""
+      state.accessToken = ""
       state.isAuthenticated = false;
     },
   },
 })
 
-// Action creators are generated for each case reducer function
 export const { saveToken, initAuth, logout } = authSlice.actions
 
 export default authSlice.reducer

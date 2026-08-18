@@ -148,8 +148,8 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 16,
     borderTopRightRadius: 16,
   },
-  title: { fontSize: 24, fontWeight: '700', color: '#111827' },
-  subtitle: { fontSize: 14, color: '#6B7280', marginTop: 4, marginBottom: 24 },
+  title: { fontSize: 24, fontWeight: '700', color: Colors.TEXT_PRIMARY },
+  subtitle: { fontSize: 14, color: Colors.TEXT_GRAY, marginTop: 4, marginBottom: 24 },
   label: { fontSize: 13, fontWeight: '600', color: '#111827', marginBottom: 6 },
   inputWrapper: {
     flexDirection: 'row', alignItems: 'center',
@@ -159,13 +159,13 @@ const styles = StyleSheet.create({
   input: { flex: 1, fontSize: 14, color: '#111827' },
   error: { color: '#DC2626', fontSize: 13, marginBottom: 12 },
   button: {
-    backgroundColor: '#E8623A', borderRadius: 12,
+    backgroundColor: Colors.PRIMARY_COLOR, borderRadius: 12,
     paddingVertical: 14, alignItems: 'center', marginTop: 8,
   },
   buttonText: { color: '#fff', fontWeight: '700', fontSize: 15 },
   dividerText: { fontSize: 13 },
-  footerText: { textAlign: 'center', color: '#6B7280', fontSize: 13, marginTop: 24 },
-  link: { color: '#E8623A', fontWeight: '700' },
+  footerText: { textAlign: 'center', color: Colors.TEXT_GRAY, fontSize: 13, marginTop: 24 },
+  link: { color: Colors.PRIMARY_COLOR, fontWeight: '700' },
   nest: {
     color: Colors.SECONDARY_COLOR,
     fontSize: 30,
